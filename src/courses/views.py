@@ -8,6 +8,7 @@ from django.views.generic.base import TemplateResponseMixin, View
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from braces.views import CsrfExemptMixin, JsonRequestResponseMixin
 from .models import Course, Content, Module
 from .forms import ModuleFormSet
 
@@ -111,6 +112,18 @@ class ContentCreateUpdateView(TemplateResponseMixin, View):
         return self.render_to_response({'form': form, 'object': self.obj})
 
 
+class ContentOrderView(CsrfExemptMixin, JsonRequestResponseMixin, View):
+    """Content Order View."""
+
+    def post(self, request):
+        """Post request to order content."""
+        for id, order in self.request_json.items():
+            Content.objects.filter(
+                id=id, module__course__owner=request.user
+            ).update(order=order)
+        return self.render_json_response({"saved": "OK"})
+
+
 class ModuleContentListView(TemplateResponseMixin, View):
     """Module content list view."""
 
@@ -123,6 +136,18 @@ class ModuleContentListView(TemplateResponseMixin, View):
             course__owner=request.user
         )
         return self.render_to_response({'module': module})
+
+
+class ModuleOrderView(CsrfExemptMixin, JsonRequestResponseMixin, View):
+    """Module order view."""
+
+    def post(self, request):
+        """Post a request to order the module."""
+        for id, order in self.request_json.items():
+            Module.objects.filter(
+                id=id, course__owner=request.user
+            ).update(order=order)
+        return self.render_json_response({'saved': 'OK'})
 
 
 class ContentDeleteView(View):
