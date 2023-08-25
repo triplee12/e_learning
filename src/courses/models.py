@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+from django.template.loader import render_to_string
 from .fields import OrderField
 
 
@@ -118,6 +119,13 @@ class ItemBase(models.Model):
     def __str__(self):
         """Item base model string representation."""
         return f"{self.title}"
+
+    def render(self):
+        """Render items."""
+        return render_to_string(
+            f'courses/content/{self._meta.model_name}.html',
+            {'item': self}
+        )
 
 
 class Text(ItemBase):
