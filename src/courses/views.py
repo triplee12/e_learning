@@ -10,6 +10,7 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.cache import cache
 from braces.views import CsrfExemptMixin, JsonRequestResponseMixin
 from students.forms import CourseEnrollForm
 from .models import Course, Content, Module, Subject
@@ -239,15 +240,27 @@ class CourseListView(TemplateResponseMixin, View):
 
     def get(self, request, subject=None):
         """Get a list of courses."""
-        subjects = Subject.objects.annotate(
-            total_coueses=Count('courses')
-        )
-        courses = Course.objects.annotate(
+        subjects = cache.get("all_subjects")
+        if not subjects:
+            subjects = Subject.objects.annotate(
+                total_coueses=Count('courses')
+            )
+            cache.set("all_subjects", subjects)
+        all_courses = Course.objects.annotate(
             total_modules=Count('modules')
         )
         if subject:
             subject = get_object_or_404(Subject, slug=subject)
-            courses = courses.filter(subject=subject)
+            key = f'subject_{subject.id}_courses'
+            courses = cache.get(key)
+            if not courses:
+                courses = all_courses.filter(subject=subject)
+                cache.set(key, courses)
+        else:
+            courses = cache.get('all_courses')
+            if not courses:
+                courses = all_courses
+                cache.set('all_courses', courses)
         return self.render_to_response(
             {
                 'subject': subject,
