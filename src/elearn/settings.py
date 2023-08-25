@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 import json
 from django.core.exceptions import ImproperlyConfigured
+from django.urls import reverse_lazy
 
 # Get secret config
 with open(
@@ -119,6 +120,9 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# Redirect student to course list after login
+LOGIN_REDIRECT_URL = reverse_lazy('student_course_list')
 
 
 # Internationalization
