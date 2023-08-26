@@ -1,7 +1,7 @@
 """Courses api serializers."""
 
 from rest_framework import serializers
-from ..models import Subject, Course, Module
+from ..models import Subject, Course, Module, Content
 
 
 class SubjectSerializer(serializers.ModelSerializer):
@@ -31,6 +31,56 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         """Meta class for Course instances."""
+
+        model = Course
+        fields = [
+            'id', 'title', 'slug', 'overview',
+            'subject', 'created', 'owner', 'modules'
+        ]
+
+
+class ItemRelatedField(serializers.RelatedField):
+    """Item related field."""
+
+    def to_representation(self, value):
+        """To represent the value of this field."""
+        return value.render()
+
+
+class ContentSerializer(serializers.ModelSerializer):
+    """Content serializer."""
+
+    item = ItemRelatedField(read_only=True)
+
+    class Meta:
+        """Meta class for ContentSerializer."""
+
+        model = Content
+        fields = ['order', 'item']
+
+
+class ModuleWithContentsSerializer(serializers.ModelSerializer):
+    """Module with content serializer."""
+
+    contents = ContentSerializer(many=True)
+    
+    class Meta:
+        """Meta class for module with content serializer."""
+
+        model = Module
+        fields = [
+            'order', 'titles',
+            'description', 'contents'
+        ]
+
+
+class CourseWithContentsSerializer(serializers.ModelSerializer):
+    """Course with contents serializer."""
+
+    modules = ModuleWithContentsSerializer(many=True)
+
+    class Meta:
+        """Meta class for CourseWithContentsSerializer."""
 
         model = Course
         fields = [
