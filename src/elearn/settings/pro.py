@@ -11,7 +11,7 @@ ADMINS = (
     ('Chukwuebuka Ejie', 'tripleeoliver@gmail.com'),
 )
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['elearn.com', 'www.elearn.com']
 
 DATABASES = {
     'default': {
