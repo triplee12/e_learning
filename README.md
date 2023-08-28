@@ -8,3 +8,4 @@ Online learning platform where students can enrole for a course or courses, do t
 - Course enrollment
 - Student registration
 - REST API for courses
+- Course chat room
