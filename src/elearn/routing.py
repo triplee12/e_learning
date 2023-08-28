@@ -1,9 +1,15 @@
 """Routing for channels."""
 
-from channels.routing import ProtocolTypeRouter
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+import chats.routing
 
 application = ProtocolTypeRouter(
     {
-        # Empty for now
+        'websocket': AuthMiddlewareStack(
+            URLRouter(
+                chats.routing.websocket_urlpatterns
+            )
+        ),
     }
 )
